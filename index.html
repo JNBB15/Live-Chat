@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket Chat</title>
+    <!---<link rel="stylesheet"  href="/index.css">-->
+
+    <style>
+
+body{
+    background-color: grey;
+    margin: 0;
+    padding-bottom: 3rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+#form {
+    background-color: rgba(0,0,0,0.15);
+    padding: 0.25rem;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    height: 3rem;
+    box-sizing: border-box;
+    backdrop-filter: blur(10px);
+}
+
+#form>button{
+    background-color: aliceblue;
+    border: none;
+    padding: 0 1rem;
+    margin: 0.25rem;
+    border-radius: 3px;
+    outline: none;
+    color: antiquewhite;
+}
+
+#input{
+    border: none;
+    padding: 0,1 rem;
+    flex-grow: 1;
+    border-radius: 2rem;
+    margin: 0.25rem;
+}
+
+input:focus{
+    outline: none;
+}
+
+#mensajes{
+    list-style-type: none; margin: 0; padding: 0;
+}
+
+#mensajes>li{
+    padding: 0.5rem 1rem;
+}
+
+#mensajes>li:nth-child(odd){
+    background-color: white;
+}
+
+</style>
+
+</head>
+<body id="body">
+    <ul id="mensajes"></ul>
+    <form id="form" action="">
+        <input id="input" autocomplete="off"><button>Enviar</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+
+        let form = document.getElementById('form');
+        let input = document.getElementById('input');
+        let mensajes = document.getElementById('mensajes');
+        let body = document.getElementById('body')
+
+        body.addEventListener('onload', function(){
+            if(Notification.permission !== 'granted'){
+                Notification.requestPermission();
+            }
+        });
+
+        function mandaNoti(msg){
+            if(Notification.permission !== 'granted'){
+                Notification.requestPermission();
+            }else{
+                const options = {
+                    body: msg,
+                    dir: 'ltr'
+                };
+                const noti = new Notification('Notification', options);
+                noti.onclick = function(){
+                    window.open('https://www.google.com.mx/');
+                }
+            }
+        };
+
+        form.addEventListener('submit', function(e){
+            e.preventDefault();
+            socket.emit('Chat Message', input.value);
+            input.value = '';
+        });
+
+        socket.on('Chat Message', function(msg){
+            let item = document.createElement('li');
+            item.textContent = msg;
+            mensajes.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+            mandarNoti(msg);
+        });
+    </script>
+</body>
+</html>
